@@ -84,8 +84,12 @@ def generate_hints():
     hints = find_strategic_hints(my_words, opponent_words, neutral_words, assassin_word)
     return jsonify(hints)
 
-# This ensures the Flask app is properly exposed
+# This ensures the Flask app is properly exposed for Gunicorn
 application = app
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
+

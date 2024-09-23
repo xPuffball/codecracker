@@ -7,7 +7,7 @@ from itertools import combinations
 app = Flask(__name__)
 
 # Enable CORS for all routes, allowing requests from http://localhost:3000
-CORS(app, resources={r"/generate-hints": {"origins": "http://localhost:3000"}})
+CORS(app, resources={r"/generate-hints": {"origins": "*"}})
 
 # Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
 print("Loading word vectors...")
@@ -89,7 +89,7 @@ def generate_hints():
 
     hints = find_strategic_hints(my_words, opponent_words, neutral_words, assassin_word)
     response = jsonify(hints)
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')  # Ensure CORS is allowed
+    response.headers.add('Access-Control-Allow-Origin', '*')  # Ensure CORS is allowed
     return response
 
 if __name__ == '__main__':

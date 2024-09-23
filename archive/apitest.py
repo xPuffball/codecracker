@@ -1,7 +1,7 @@
 import requests
 import json
 
-base_url = "http://127.0.0.1:5000/generate-hints"
+base_url = "https://codecracker-2.onrender.com/generate-hints"
 
 # Data to be sent in the request
 data = {

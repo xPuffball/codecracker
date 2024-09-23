@@ -8,9 +8,7 @@ import json
 app = Flask(__name__)
 
 # Configure CORS to allow specific origins or all
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})  # Allow all origins
-# OR
-# CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})  # Allow specific origins
+CORS(app, support_credentials=True)
 
 # Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
 print("Loading word vectors...")
@@ -71,7 +69,7 @@ def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral
     return strategic_hints
 
 @app.route('/generate-hints', methods=['GET', 'POST'])
-@cross_origin() 
+@cross_origin(supports_credentials=True)
 def generate_hints():
     if request.method == 'POST':
         data = request.json
@@ -93,4 +91,4 @@ def generate_hints():
 application = app
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)

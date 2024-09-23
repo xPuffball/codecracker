@@ -1,11 +1,11 @@
 import requests
 import json
 
-base_url = "https://codecracker-2.onrender.com/generate-hints"
+base_url = "http://159.203.7.203:5000/generate-hints"
 
 # Data to be sent in the request
 data = {
-    "my_words": ["apple", "tree", "green"],
+    "my_words": ["apple", "tree", 'test', 'paper', 'gun', 'war', 'cup'],
     "opponent_words": ["car", "road", "wheel",'poop','pee','stupid','hello','greetings','laptop'],
     "neutral_words": ["house", "window", "door"],
     "assassin_word": "poison"

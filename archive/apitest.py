@@ -6,7 +6,7 @@ base_url = "https://codecracker-2.onrender.com/generate-hints"
 # Data to be sent in the request
 data = {
     "my_words": ["apple", "tree", "green"],
-    "opponent_words": ["car", "road", "wheel"],
+    "opponent_words": ["car", "road", "wheel",'poop','pee','stupid','hello','greetings','laptop'],
     "neutral_words": ["house", "window", "door"],
     "assassin_word": "poison"
 }

@@ -5,11 +5,6 @@ from typing import List, Tuple, Dict
 from itertools import combinations
 import json
 
-# Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
-print("Loading word vectors...")
-word_vectors = api.load('glove-wiki-gigaword-100')
-print("Word vectors loaded.")
-
 def is_valid_hint(hint: str, board_words: set) -> bool:
     hint_lower = hint.lower()
     for word in board_words:
@@ -64,11 +59,15 @@ def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral
     return strategic_hints
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={r"/generate-hints": {"origins": "*"}}, supports_credentials=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
+# Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
+print("Loading word vectors...")
+word_vectors = api.load('glove-wiki-gigaword-100')
+print("Word vectors loaded.")
+
 @app.route('/generate-hints', methods=['GET', 'POST'])
-@cross_origin()
 def generate_hints():
     if request.method == 'POST':
         data = request.json

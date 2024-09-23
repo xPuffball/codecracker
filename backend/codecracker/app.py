@@ -1,15 +1,9 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 import gensim.downloader as api
 from typing import List, Tuple, Dict
 from itertools import combinations
 import json
-
-app = Flask(__name__)
-app.config['CORS_HEADERS'] = 'Content-Type'
-
-# Configure CORS to allow specific origins or all
-CORS(app, resources={r"/generate-hints": {"origins": "http://localhost:8000"}})
 
 # Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
 print("Loading word vectors...")
@@ -30,7 +24,7 @@ def calculate_coherence_score(hint: str, words: List[str]) -> float:
         return 0
     return (sum(similarities) / len(similarities)) * (len(similarities) ** 0.5)
 
-def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral_words: List[str], assassin_word: str) -> Dict[int, List[Dict]]:
+def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral_words: List[str], assassin_word: str) -> Dict[int, List[Tuple[str, float, List[str]]]]:
     all_board_words = set(my_words + opponent_words + neutral_words + [assassin_word])
     
     def get_valid_hints(words: List[str], top_n: int = 100) -> List[str]:
@@ -69,8 +63,7 @@ def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral
 
     return strategic_hints
 
-@app.route('/generate-hints', methods=['POST'])
-@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
+@app.route('/generate-hints', methods=['GET', 'POST'])
 def generate_hints():
     if request.method == 'POST':
         data = request.json
@@ -86,11 +79,14 @@ def generate_hints():
         return jsonify({"error": "No words provided"}), 400
 
     hints = find_strategic_hints(my_words, opponent_words, neutral_words, assassin_word)
-    hints.headers.add('Access-Control-Allow-Origin', '*')
     return jsonify(hints)
 
-# This ensures the Flask app is properly exposed for Gunicorn
-application = app
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
+
+
+
+

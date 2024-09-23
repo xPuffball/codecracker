@@ -1,9 +1,18 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS, cross_origin
+from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 import gensim.downloader as api
 from typing import List, Tuple, Dict
 from itertools import combinations
-import json
+
+app = Flask(__name__)
+
+# Enable CORS for all routes, allowing requests from http://localhost:3000
+CORS(app, resources={r"/generate-hints": {"origins": "http://localhost:3000"}})
+
+# Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
+print("Loading word vectors...")
+word_vectors = api.load('glove-wiki-gigaword-100')
+print("Word vectors loaded.")
 
 def is_valid_hint(hint: str, board_words: set) -> bool:
     hint_lower = hint.lower()
@@ -58,36 +67,30 @@ def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral
 
     return strategic_hints
 
-app = Flask(__name__)
-CORS(app, resources={r"/generate-hints": {"origins": "*"}}, supports_credentials=True)
-app.config['CORS_HEADERS'] = 'Content-Type'
-
-# Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
-print("Loading word vectors...")
-word_vectors = api.load('glove-wiki-gigaword-100')
-print("Word vectors loaded.")
-
-@app.route('/generate-hints', methods=['GET', 'POST'])
+@app.route('/generate-hints', methods=['POST', 'OPTIONS'])
 def generate_hints():
-    if request.method == 'POST':
-        data = request.json
-    else:  # GET
-        data = request.args
-
-    my_words = data.get('my_words', '').split(',') if isinstance(data.get('my_words'), str) else data.get('my_words', [])
-    opponent_words = data.get('opponent_words', '').split(',') if isinstance(data.get('opponent_words'), str) else data.get('opponent_words', [])
-    neutral_words = data.get('neutral_words', '').split(',') if isinstance(data.get('neutral_words'), str) else data.get('neutral_words', [])
+    if request.method == 'OPTIONS':
+        # Handle the preflight request for CORS
+        response = make_response()
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        return response
+    
+    # POST request: generate hints
+    data = request.json
+    my_words = data.get('my_words', [])
+    opponent_words = data.get('opponent_words', [])
+    neutral_words = data.get('neutral_words', [])
     assassin_word = data.get('assassin_word', '')
 
     if not my_words:
         return jsonify({"error": "No words provided"}), 400
 
     hints = find_strategic_hints(my_words, opponent_words, neutral_words, assassin_word)
-    return jsonify(hints)
+    response = jsonify(hints)
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')  # Ensure CORS is allowed
+    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-

@@ -6,9 +6,10 @@ from itertools import combinations
 import json
 
 app = Flask(__name__)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Configure CORS to allow specific origins or all
-CORS(app, resources={r"/generate-hints": {"origins": "*"}})
+CORS(app, resources={r"/generate-hints": {"origins": "http://localhost:8000"}})
 
 # Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
 print("Loading word vectors...")
@@ -68,8 +69,8 @@ def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral
 
     return strategic_hints
 
-@app.route('/generate-hints', methods=['GET', 'POST'])
-@cross_origin()
+@app.route('/generate-hints', methods=['POST'])
+@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
 def generate_hints():
     if request.method == 'POST':
         data = request.json
@@ -92,4 +93,4 @@ def generate_hints():
 application = app
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run()

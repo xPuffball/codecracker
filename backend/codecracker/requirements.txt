@@ -6,7 +6,7 @@ dl==0.1.0
 docutils==0.18.1
 docutils==0.18.1
 Flask==2.2.5
-Flask_Cors==5.0.0
+flask_cors==5.0.0
 gensim==4.3.0
 HTMLParser==0.0.2
 ipython==8.12.3

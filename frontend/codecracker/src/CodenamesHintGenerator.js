@@ -75,7 +75,7 @@ const CodenamesHintGenerator = () => {
         assassin_word: words.find(w => w.type === WORD_TYPES.ASSASSIN)?.word || ''
       };
 
-      const response = await axios.post('http://127.0.0.1:5000/generate-hints', gameState);
+      const response = await axios.post('https://codecracker-2.onrender.com/generate-hints', gameState);
       setHints(response.data);
     } catch (err) {
       setError('Failed to generate hints. Please try again.');

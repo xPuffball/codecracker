@@ -6,7 +6,11 @@ from itertools import combinations
 import json
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+
+# Configure CORS to allow specific origins or all
+CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins
+# OR
+# CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})  # Allow specific origins
 
 # Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
 print("Loading word vectors...")
@@ -27,7 +31,7 @@ def calculate_coherence_score(hint: str, words: List[str]) -> float:
         return 0
     return (sum(similarities) / len(similarities)) * (len(similarities) ** 0.5)
 
-def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral_words: List[str], assassin_word: str) -> Dict[int, List[Tuple[str, float, List[str]]]]:
+def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral_words: List[str], assassin_word: str) -> Dict[int, List[Dict]]:
     all_board_words = set(my_words + opponent_words + neutral_words + [assassin_word])
     
     def get_valid_hints(words: List[str], top_n: int = 100) -> List[str]:
@@ -89,7 +93,3 @@ application = app
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-

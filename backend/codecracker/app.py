@@ -8,7 +8,7 @@ import json
 app = Flask(__name__)
 
 # Configure CORS to allow specific origins or all
-CORS(app, support_credentials=True)
+CORS(app, resources={r"/generate-hints": {"origins": "*"}})
 
 # Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
 print("Loading word vectors...")
@@ -69,7 +69,7 @@ def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral
     return strategic_hints
 
 @app.route('/generate-hints', methods=['GET', 'POST'])
-@cross_origin(supports_credentials=True)
+@cross_origin()
 def generate_hints():
     if request.method == 'POST':
         data = request.json
@@ -85,6 +85,7 @@ def generate_hints():
         return jsonify({"error": "No words provided"}), 400
 
     hints = find_strategic_hints(my_words, opponent_words, neutral_words, assassin_word)
+    hints.headers.add('Access-Control-Allow-Origin', '*')
     return jsonify(hints)
 
 # This ensures the Flask app is properly exposed for Gunicorn

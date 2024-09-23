@@ -10,7 +10,7 @@ CORS(app)  # Enable CORS for all routes
 
 # Load word vectors (this might take a while, consider loading on-demand or using a smaller model)
 print("Loading word vectors...")
-word_vectors = api.load('word2vec-google-news-300')
+word_vectors = api.load('glove-wiki-gigaword-100')
 print("Word vectors loaded.")
 
 def is_valid_hint(hint: str, board_words: set) -> bool:

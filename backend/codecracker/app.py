@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import gensim.downloader as api
 from typing import List, Tuple, Dict
 from itertools import combinations
@@ -63,7 +63,12 @@ def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral
 
     return strategic_hints
 
+app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 @app.route('/generate-hints', methods=['GET', 'POST'])
+@cross_origin()
 def generate_hints():
     if request.method == 'POST':
         data = request.json
@@ -80,9 +85,6 @@ def generate_hints():
 
     hints = find_strategic_hints(my_words, opponent_words, neutral_words, assassin_word)
     return jsonify(hints)
-
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
 if __name__ == '__main__':
     app.run(debug=True)

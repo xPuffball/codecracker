@@ -76,7 +76,6 @@ const CodenamesHintGenerator = () => {
       };
       console.log(gameState);
   
-      // Use relative URL instead of the full one
       const response = await axios.post('https://159.203.7.203:5000/generate-hints', gameState);
       setHints(response.data);
     } catch (err) {

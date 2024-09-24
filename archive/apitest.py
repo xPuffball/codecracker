@@ -1,7 +1,7 @@
 import requests
 import json
 
-base_url = "http://159.203.7.203:5000/generate-hints"
+base_url = "https://159.203.7.203:5000/generate-hints"
 
 # Data to be sent in the request
 data = {

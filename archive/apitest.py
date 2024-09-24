@@ -1,18 +1,44 @@
 import requests
 import json
 
-base_url = "https://159.203.7.203:5000/generate-hints"
+base_url = "https://159.203.7.203/generate-hints"
 
 # Data to be sent in the request
 data = {
-    "my_words": ["apple", "tree", 'test', 'paper', 'gun', 'war', 'cup'],
-    "opponent_words": ["car", "road", "wheel",'poop','pee','stupid','hello','greetings','laptop'],
-    "neutral_words": ["house", "window", "door"],
-    "assassin_word": "poison"
+    "my_words": [
+        "tennis",
+        "pepper",
+        "kind",
+        "home",
+        "head",
+        "team",
+        "problem",
+        "lot",
+        "business"
+    ],
+    "opponent_words": [
+        "world",
+        "interest",
+        "elephant",
+        "family",
+        "car",
+        "sand",
+        "monkey",
+        "snow",
+    ],
+    "neutral_words": [
+        "elephant",
+        "family",
+        "car",
+        "question",
+        "beach",
+        "art",
+        "port"
+    ],
+    "assassin_word": "monkey"
 }
-
 # Send POST request with JSON data
-response = requests.post(base_url, json=data)
+response = requests.post(base_url, json=data, verify=False)
 
 # Check the response
 if response.status_code == 200:
@@ -23,3 +49,5 @@ else:
     print(f"Request failed with status code: {response.status_code}")
     print("Response:")
     print(response.text)
+
+    

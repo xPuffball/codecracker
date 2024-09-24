@@ -68,12 +68,18 @@ const CodenamesHintGenerator = () => {
     setIsLoading(true);
     setError(null);
     try {
+      // Filter for opponent words that are only from the opposite team (not neutral or assassin)
+      const opponentWords = words
+        .filter(w => w.type !== hintTeam && w.type !== WORD_TYPES.NEUTRAL && w.type !== WORD_TYPES.ASSASSIN)
+        .map(w => w.word);
+  
       const gameState = {
         my_words: words.filter(w => w.type === hintTeam).map(w => w.word),
-        opponent_words: words.filter(w => w.type !== hintTeam && w.type !== WORD_TYPES.UNASSIGNED).map(w => w.word),
+        opponent_words: opponentWords,  // Only words from the opposite team
         neutral_words: words.filter(w => w.type === WORD_TYPES.NEUTRAL).map(w => w.word),
         assassin_word: words.find(w => w.type === WORD_TYPES.ASSASSIN)?.word || ''
       };
+  
       console.log(gameState);
   
       const response = await axios.post('https://159.203.7.203/generate-hints', gameState);

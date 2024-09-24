@@ -76,7 +76,7 @@ const CodenamesHintGenerator = () => {
       };
       console.log(gameState);
   
-      const response = await axios.post('https://159.203.7.203:5000/generate-hints', gameState);
+      const response = await axios.post('https://159.203.7.203/generate-hints', gameState);
       setHints(response.data);
     } catch (err) {
       setError('Failed to generate hints. Please try again.');

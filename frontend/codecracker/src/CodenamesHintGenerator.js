@@ -22,9 +22,8 @@ import {
   InputLabel
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import WORD_POOL from './wordPool.js';  // Import the word pool
+import WORD_POOL from './wordPool.js';
 
-// Import your agent images here
 import blueAgentImage from './agentImages/blue.png';
 import redAgentImage from './agentImages/red.png';
 import neutralAgentImage from './agentImages/net.png';
@@ -68,14 +67,13 @@ const CodenamesHintGenerator = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Filter for opponent words that are only from the opposite team (not neutral or assassin)
       const opponentWords = words
         .filter(w => w.type !== hintTeam && w.type !== WORD_TYPES.NEUTRAL && w.type !== WORD_TYPES.ASSASSIN)
         .map(w => w.word);
   
       const gameState = {
         my_words: words.filter(w => w.type === hintTeam).map(w => w.word),
-        opponent_words: opponentWords,  // Only words from the opposite team
+        opponent_words: opponentWords,
         neutral_words: words.filter(w => w.type === WORD_TYPES.NEUTRAL).map(w => w.word),
         assassin_word: words.find(w => w.type === WORD_TYPES.ASSASSIN)?.word || ''
       };
@@ -94,11 +92,11 @@ const CodenamesHintGenerator = () => {
 
   const getCardColor = (type) => {
     switch (type) {
-      case WORD_TYPES.BLUE: return '#BBDEFB';  // Light Blue
-      case WORD_TYPES.RED: return '#FFCDD2';  // Light Red
-      case WORD_TYPES.NEUTRAL: return '#FFF9C4';  // Light Yellow
-      case WORD_TYPES.ASSASSIN: return '#212121';  // Dark Grey
-      default: return '#FFFFFF';  // White
+      case WORD_TYPES.BLUE: return '#BBDEFB';
+      case WORD_TYPES.RED: return '#FFCDD2';
+      case WORD_TYPES.NEUTRAL: return '#FFF9C4';
+      case WORD_TYPES.ASSASSIN: return '#212121';
+      default: return '#FFFFFF';
     }
   };
 

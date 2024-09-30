@@ -4,7 +4,10 @@ import gensim.downloader as api
 from typing import List, Tuple, Dict
 from itertools import combinations
 import nltk
-from nltk.corpus import stopwords
+from nltk.corpus import stopwords, wordnet
+from nltk import pos_tag
+
+nltk.download('averaged_perceptron_tagger_eng')
 
 app = Flask(__name__)
 
@@ -17,6 +20,8 @@ word_vectors = api.load('glove-twitter-25')
 print("Word vectors loaded.")
 
 nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
 stop_words = set(stopwords.words('english'))
 
 similarity_cache = {}
@@ -34,6 +39,14 @@ def get_similarity(word1: str, word2: str) -> float:
     similarity_cache[pair] = similarity
     return similarity
 
+def get_synonyms(word: str) -> List[str]:
+    synonyms = set()
+    for synset in wordnet.synsets(word):
+        for lemma in synset.lemmas():
+            if lemma.name().isalpha():  # Only include valid words
+                synonyms.add(lemma.name())
+    return list(synonyms)
+
 def is_valid_hint(hint: str, board_words: set) -> bool:
     hint_lower = hint.lower()
     
@@ -47,47 +60,51 @@ def is_valid_hint(hint: str, board_words: set) -> bool:
     
     return True
 
-def calculate_coherence_score(hint: str, words: List[str]) -> float:
+def is_ambiguous_hint(hint: str) -> bool:
+    pos = pos_tag([hint])[0][1]
+    return pos in ['NNP', 'NNPS']  # Filtering out proper nouns
+
+def calculate_weighted_coherence(hint: str, words: List[str], weight_factor: float = 0.7) -> float:
     similarities = [get_similarity(hint, word) for word in words]
-    if not similarities:
-        return 0
-    return (sum(similarities) / len(similarities)) * (len(similarities) ** 0.5)
+    return sum(similarities) / (len(similarities) ** weight_factor) if similarities else 0
+
+def adaptive_threshold(num_words: int) -> float:
+    base_threshold = 0.4
+    return base_threshold - (num_words * 0.05)
+
+def get_valid_hints(words: List[str], all_board_words: set, top_n: int = 100) -> List[str]:
+    hints = set()
+    for word in words:
+        if word in word_vectors:
+            similar_words = word_vectors.most_similar(word, topn=top_n)
+            for hint, _ in similar_words:
+                synonyms = get_synonyms(hint)  # Add synonyms for hint diversity
+                for synonym in synonyms:
+                    if synonym.isalpha() and is_valid_hint(synonym, all_board_words) and not is_ambiguous_hint(synonym):
+                        hints.add(synonym)
+    return list(hints)
 
 def find_strategic_hints(my_words: List[str], opponent_words: List[str], neutral_words: List[str], assassin_word: str) -> Dict[int, List[Tuple[str, float, List[str]]]]:
     all_board_words = set(my_words + opponent_words + neutral_words + [assassin_word])
 
-    def get_valid_hints(words: List[str], top_n: int = 100) -> List[str]:
-        hints = set()
-        for word in words:
-            if word in word_vectors:
-                similar = word_vectors.most_similar(word, topn=top_n)
-                hints.update([w for w, _ in similar if w.isalpha() and ' ' not in w and is_valid_hint(w, all_board_words)])
-        return list(hints)
-
-    valid_hints = get_valid_hints(my_words)
+    valid_hints = get_valid_hints(my_words, all_board_words)
     strategic_hints = {2: [], 3: [], 4: []}
 
     for num_words in range(4, 1, -1):
         for words_combo in combinations(my_words, num_words):
             for hint in valid_hints:
-                coherence_score = calculate_coherence_score(hint, words_combo)
+                coherence_score = calculate_weighted_coherence(hint, words_combo)
                 opponent_score = max((get_similarity(hint, w) for w in opponent_words), default=0)
                 assassin_score = get_similarity(hint, assassin_word)
+                
+                dynamic_threshold = adaptive_threshold(num_words)
 
-                threshold = 0.35 if num_words > 2 else 0.45
-
-                if coherence_score > threshold and coherence_score > opponent_score and coherence_score > assassin_score:
+                if coherence_score > dynamic_threshold and coherence_score > opponent_score and coherence_score > assassin_score:
                     strategic_hints[num_words].append((hint, coherence_score, list(words_combo)))
 
     for num_words in strategic_hints:
         strategic_hints[num_words].sort(key=lambda x: x[1], reverse=True)
-        seen_hints = set()
-        unique_hints = []
-        for hint, score, words in strategic_hints[num_words]:
-            if hint not in seen_hints:
-                seen_hints.add(hint)
-                unique_hints.append({"hint": hint, "score": score, "words": words})
-        strategic_hints[num_words] = unique_hints[:5]  # Keep top 5 unique hints for each word count
+        strategic_hints[num_words] = strategic_hints[num_words][:5]  # Keep top 5 hints
 
     return strategic_hints
 
@@ -122,5 +139,22 @@ def generate_hints():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+def test_find_strategic_hints():
+    # Define test case words
+    my_words = ['dog', 'phone', 'rabbit', 'gun', 'tree', 'table', 'laptop']
+    opponent_words = ['fish', 'book', 'war', 'pipe', 'kiwi', 'hair']
+    neutral_words = ['car', 'tree', 'house']
+    assassin_word = 'shark'
+
+    # Call the function directly
+    hints = find_strategic_hints(my_words, opponent_words, neutral_words, assassin_word)
+    
+    # Print the output in a readable format
+    for num_words, hint_list in hints.items():
+        print(f"\nHints for {num_words} words:")
+        for hint, score, words in hint_list:
+            print(f"Hint: {hint}, Score: {score}, Words: {', '.join(words)}")
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    test_find_strategic_hints()
+    # app.run(debug=True)

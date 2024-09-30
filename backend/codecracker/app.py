@@ -139,22 +139,5 @@ def generate_hints():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-def test_find_strategic_hints():
-    # Define test case words
-    my_words = ['dog', 'phone', 'rabbit', 'gun', 'tree', 'table', 'laptop']
-    opponent_words = ['fish', 'book', 'war', 'pipe', 'kiwi', 'hair']
-    neutral_words = ['car', 'tree', 'house']
-    assassin_word = 'shark'
-
-    # Call the function directly
-    hints = find_strategic_hints(my_words, opponent_words, neutral_words, assassin_word)
-    
-    # Print the output in a readable format
-    for num_words, hint_list in hints.items():
-        print(f"\nHints for {num_words} words:")
-        for hint, score, words in hint_list:
-            print(f"Hint: {hint}, Score: {score}, Words: {', '.join(words)}")
-
 if __name__ == '__main__':
-    test_find_strategic_hints()
-    # app.run(debug=True)
+    app.run(debug=True)

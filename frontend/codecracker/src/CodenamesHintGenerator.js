@@ -330,12 +330,12 @@ const CodenamesHintGenerator = () => {
             <Typography variant="h5" gutterBottom>
               Codes Cracked for {hintTeam === WORD_TYPES.BLUE ? 'Blue' : 'Red'} Team:
             </Typography>
-            {[4, 3, 2].map(numWords => (
+            {hints && [4, 3, 2].map(numWords => (
               <Box key={numWords} sx={{ mb: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   {numWords}-Word Hints:
                 </Typography>
-                {hints[numWords].length > 0 ? (
+                {hints[numWords] && hints[numWords].length > 0 ? (
                   <Grid container spacing={2}>
                     {hints[numWords].map((hint, index) => (
                       <Grid item xs={12} sm={6} md={4} key={index}>
@@ -345,7 +345,7 @@ const CodenamesHintGenerator = () => {
                               {hint.hint}
                             </Typography>
                             <Typography variant="body2" color="textSecondary">
-                              Score: {hint.score.toFixed(2)}
+                              Score: {hint.score ? hint.score.toFixed(2) : "N/A"}
                             </Typography>
                             <Box sx={{ mt: 1 }}>
                               {hint.words.map((word, i) => (

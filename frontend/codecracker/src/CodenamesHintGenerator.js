@@ -66,27 +66,31 @@ const CodenamesHintGenerator = () => {
   const generateHints = async () => {
     setIsLoading(true);
     setError(null);
-  
     try {
+      // Filter for opponent words that are only from the opposite team (not neutral or assassin)
+      const opponentWords = words
+        .filter(w => w.type !== hintTeam && w.type !== WORD_TYPES.NEUTRAL && w.type !== WORD_TYPES.ASSASSIN)
+        .map(w => w.word);
+  
       const gameState = {
         my_words: words.filter(w => w.type === hintTeam).map(w => w.word),
-        opponent_words: words.filter(w => w.type !== hintTeam && w.type !== WORD_TYPES.NEUTRAL && w.type !== WORD_TYPES.ASSASSIN).map(w => w.word),
+        opponent_words: opponentWords,  // Only words from the opposite team
         neutral_words: words.filter(w => w.type === WORD_TYPES.NEUTRAL).map(w => w.word),
         assassin_word: words.find(w => w.type === WORD_TYPES.ASSASSIN)?.word || ''
       };
   
-      const response = await axios.post(
-        "https://codecrackerbackend.online/generate-hints",
-        gameState,
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+      console.log(gameState);
+  
+      const response = await axios.post('https://codecrackerbackend.online/generate-hints', gameState);
       setHints(response.data);
+      console.log(hints)
     } catch (err) {
       setError('Failed to generate hints. Please try again.');
       console.error('Error generating hints:', err);
     }
     setIsLoading(false);
   };
+  
   
 
   const getCardColor = (type) => {
@@ -329,7 +333,7 @@ const CodenamesHintGenerator = () => {
             <Typography variant="h5" gutterBottom>
               Codes Cracked for {hintTeam === WORD_TYPES.BLUE ? 'Blue' : 'Red'} Team:
             </Typography>
-            {hints && [4, 3, 2].map(numWords => (
+            {[4, 3, 2].map(numWords => (
               <Box key={numWords} sx={{ mb: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   {numWords}-Word Hints:
@@ -340,14 +344,19 @@ const CodenamesHintGenerator = () => {
                       <Grid item xs={12} sm={6} md={4} key={index}>
                         <Card>
                           <CardContent>
+                            {/* Accessing the hint word */}
                             <Typography variant="h6" gutterBottom>
-                              {hint.hint}
+                              {hint[0]} {/* This is the hint word */}
                             </Typography>
+                            
+                            {/* Accessing the score and ensuring it is not undefined */}
                             <Typography variant="body2" color="textSecondary">
-                              Score: {hint.score ? hint.score.toFixed(2) : "N/A"}
+                              Score: {hint[1] ? hint[1].toFixed(2) : 'N/A'} {/* This is the score */}
                             </Typography>
+                            
+                            {/* Accessing the associated words */}
                             <Box sx={{ mt: 1 }}>
-                              {hint.words.map((word, i) => (
+                              {hint[2] && hint[2].map((word, i) => (
                                 <Typography key={i} variant="body2" component="span" sx={{ mr: 1 }}>
                                   {word}
                                 </Typography>
@@ -365,6 +374,8 @@ const CodenamesHintGenerator = () => {
             ))}
           </Box>
         )}
+
+
       </Container>
     </>
   );

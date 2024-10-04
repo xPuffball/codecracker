@@ -66,21 +66,20 @@ const CodenamesHintGenerator = () => {
   const generateHints = async () => {
     setIsLoading(true);
     setError(null);
-    try {
-      const opponentWords = words
-        .filter(w => w.type !== hintTeam && w.type !== WORD_TYPES.NEUTRAL && w.type !== WORD_TYPES.ASSASSIN)
-        .map(w => w.word);
   
+    try {
       const gameState = {
         my_words: words.filter(w => w.type === hintTeam).map(w => w.word),
-        opponent_words: opponentWords,
+        opponent_words: words.filter(w => w.type !== hintTeam && w.type !== WORD_TYPES.NEUTRAL && w.type !== WORD_TYPES.ASSASSIN).map(w => w.word),
         neutral_words: words.filter(w => w.type === WORD_TYPES.NEUTRAL).map(w => w.word),
         assassin_word: words.find(w => w.type === WORD_TYPES.ASSASSIN)?.word || ''
       };
   
-      console.log(gameState);
-  
-      const response = await axios.post("https://codecrackerbackend.online/generate-hints", gameState);
+      const response = await axios.post(
+        "https://codecrackerbackend.online/generate-hints",
+        gameState,
+        { headers: { 'Content-Type': 'application/json' } }
+      );
       setHints(response.data);
     } catch (err) {
       setError('Failed to generate hints. Please try again.');
